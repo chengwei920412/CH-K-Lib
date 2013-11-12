@@ -7,13 +7,16 @@
 *.dni
 *.wsdt
 *.pbi
+*.bin
 *.cout
 *.crf
 *.d
+*.sct
 *.htm
 *.map
 *.axf
 *.lnp
+*.txt
 *.ini
 *.lst
 output
