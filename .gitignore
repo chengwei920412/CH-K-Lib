@@ -1,1 +1,44 @@
-asasd
+# Object files
+*.o
+*.ko
+*.o.*
+*.bat
+*.dbgdt
+*.dni
+*.wsdt
+*.pbi
+*.cout
+*.crf
+*.d
+*.htm
+*.map
+*.axf
+*.lnp
+*.ini
+*.lst
+output
+settings
+Debug
+Release
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.hex
+
+# Project files
+*.plg
+*.Yandld
+*.dep
+*.bak
