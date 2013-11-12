@@ -1,0 +1,108 @@
+#include "sys.h"
+#include "uart.h"
+#include "gpio.h"
+#include "adc.h"
+#include "can.h"
+#include "dac.h"
+#include "delay.h"
+#include "dma.h"
+#include "enet.h"
+#include "flash.h"
+#include "ftm.h"
+#include "i2c.h"
+#include "lptm.h"
+#include "pdb.h"
+#include "pit.h"
+#include "rtc.h"
+#include "sd.h"
+#include "spi.h"
+#include "tsi.h"
+#include "wdog.h"
+
+//LED Devices
+#include "led.h"
+#include "led_chk60evb.h"
+//KBI Devices
+#include "kbi.h"
+#include "kbi_chk60evb.h"
+//SPI Flash Devices;
+#include "spiflash.h"
+//LCD Devices
+#include "lcd_chk60evb.h"  
+#include "ads7843.h"
+
+//CHGUI 
+#include "chgui.h"         
+#include "chgui_char.h"    
+#include "chgui_bmp.h"     
+#include "chgui_touch.h"
+
+//nrf24xx
+#include "nrf2401.h"
+
+//超核 飞思卡尔 Kinetis固件库例程
+//固件库版本 V2.4
+//startup:        启动文件
+//devices:        硬件板子资源支持库(部分实验用到)
+//utilities:      软件模块支持库(部分实验用到)
+//drivers:        固件库源码
+//use:            用户代码 包含mian函数和 中断服务程序 
+
+/*
+* 入门知识:
+* 1- DMA 就是搬运工 可以在CPU不干预的情况下搬运海量数据 特别适用于大数据量传输
+* 2- 在本例程中 将DMA用作内存之间的搬运 将一片内存的数据 复制到另一片内存中 主要为了演示DMA的最简单功能
+*/
+
+uint8_t DMASrcBuffer[256]; //DMA源地址测试用
+uint8_t DMADestBuffer[256];//DMA传输的目的地址 测试用
+
+int main(void)
+{
+    uint32_t i =0;
+    DMA_InitTypeDef DMA_InitStruct1;
+    SystemClockSetup(ClockSource_EX50M,CoreClock_100M);
+    DelayInit();
+    LED_Init(LED_PinLookup_CHK60EVB, kNumOfLED);
+    UART_DebugPortInit(UART4_RX_C14_TX_C15, 115200);
+	  DisplayCPUInfo();
+    //数据设置
+    for(i=0;i<256;i++)
+    {
+        DMASrcBuffer[i] = i;
+        DMADestBuffer[i] = 0;
+    }
+    DMA_InitStruct1.Channelx = DMA_CH0;                         //使用DMA0通道  (0-15)
+    DMA_InitStruct1.DMAAutoClose = ENABLE;                      //传输完毕后自动关闭
+    DMA_InitStruct1.EnableState = ENABLE;                       //初始化后立即开始传输
+    DMA_InitStruct1.MinorLoopLength = 256;                      //传输256次
+    DMA_InitStruct1.PeripheralDMAReq  = DMA_MUX2;               //不需要触发源 尽最大努力传输
+    DMA_InitStruct1.TransferBytes = 1;                          //每次传输一个字节
+    //配置目的地址传输参数
+    DMA_InitStruct1.DestBaseAddr = (uint32_t)DMADestBuffer;     //指向目的地址
+    DMA_InitStruct1.DestDataSize = DMA_DST_8BIT;                //数组为1Byte
+    DMA_InitStruct1.DestMajorInc = 0;                           //只执行一次大循环
+    DMA_InitStruct1.DestMinorInc = 1;                           //每次传输完地址+1
+ 
+    //配置源地址传输参数
+    DMA_InitStruct1.SourceBaseAddr = (uint32_t)DMASrcBuffer;
+    DMA_InitStruct1.SourceDataSize = DMA_SRC_8BIT;
+    DMA_InitStruct1.SourceMajorInc = 0;
+    DMA_InitStruct1.SourceMinorInc = 1;
+    DMA_Init(&DMA_InitStruct1);
+    NVIC_EnableIRQ(DMA0_IRQn); 
+    DMA_ITConfig(DMA0, DMA_IT_MAJOR, DMA_CH0,ENABLE); //开启传输完成中断
+    //等待传输完成
+    while(DMA_IsComplete(DMA_CH0) == FALSE);
+    UART_printf("DMADestBuffer:\r\n");
+    for(i=0;i<256;i++)
+    {
+        UART_printf("%x ",DMADestBuffer[i]);
+    }
+	
+    while(1)
+    {
+		
+    }
+}
+
