@@ -32,7 +32,7 @@ typedef enum{FALSE = 0, TRUE = !FALSE} ErrorState;
 
 /* CH_Kinetis version information */
 #define CHK_VERSION                      2L              /**< major version number */
-#define CHK_SUBVERSION                   4L              /**< minor version number */
+#define CHK_SUBVERSION                4L              /**< minor version number */
 #define CHK_REVISION                     1L              /**< revise version number */
 
 /* CH_Kinetis version */
@@ -76,9 +76,9 @@ typedef struct
 extern CPUInfoType_t CPUInfo;
 
 //MCG时钟源选择
-#define ClockSource_IRC     ((uint8_t)0x0)
-#define ClockSource_EX50M  	((uint8_t)0x5)
-#define ClockSource_EX8M			((uint8_t)0x6)
+#define ClockSource_IRC        ((uint8_t)0x0)
+#define ClockSource_EX50M   ((uint8_t)0x5)
+#define ClockSource_EX8M     ((uint8_t)0x6)
 //参数检测器宏
 #define IS_CLOCK_OPTION(SOURCE)			 (((SOURCE)  == ClockSource_IRC)  ||  \
                                        ((SOURCE) == ClockSource_EX50M) || \

@@ -230,7 +230,7 @@ void I2C_SetMasterMode(I2C_Type* I2Cx,uint8_t I2C_Direction)
  返回：0
  详解：0 
 ************************************************************************************************/
-void I2C_GenerateAck(I2C_Type *I2Cx)
+void I2C_GenerateNAck(I2C_Type *I2Cx)
 {
 	//参数检查
 	assert_param(IS_I2C_ALL_PERIPH(I2Cx));
@@ -245,7 +245,7 @@ void I2C_GenerateAck(I2C_Type *I2Cx)
  返回：0
  详解：0 
 ************************************************************************************************/
-void I2C_EnableAck(I2C_Type *I2Cx)
+void I2C_GenerateAck(I2C_Type *I2Cx)
 {
 	//参数检查
 	assert_param(IS_I2C_ALL_PERIPH(I2Cx));

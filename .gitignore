@@ -7,6 +7,8 @@
 *.__i
 *.dbgdt
 *.tra
+*.pbd
+*.browse
 *.tmp
 *.db
 *.dni

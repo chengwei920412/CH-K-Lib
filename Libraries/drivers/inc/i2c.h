@@ -97,11 +97,12 @@ void I2C_Send7bitAddress(I2C_Type* I2Cx, uint8_t Address, uint8_t I2C_Direction)
 uint8_t I2C_WaitAck(I2C_Type *I2Cx);
 void I2C_SetMasterMode(I2C_Type* I2Cx,uint8_t I2C_Direction);
 void I2C_GenerateAck(I2C_Type *I2Cx);
-void I2C_EnableAck(I2C_Type *I2Cx);
+void I2C_GenerateNAck(I2C_Type *I2Cx);
 void I2C_ITConfig(I2C_Type* I2Cx, uint16_t I2C_IT, FunctionalState NewState);
 ITStatus I2C_GetITStatus(I2C_Type* I2Cx, uint16_t I2C_IT);
 void I2C_DMACmd(I2C_Type* I2Cx, uint16_t I2C_DMAReq, FunctionalState NewState);
 void I2C_ClearITPendingBit(I2C_Type* I2Cx, uint16_t I2C_IT);
+uint8_t I2C_IsLineBusy(I2C_Type* I2Cx);
 
 #ifdef __cplusplus
 }

@@ -35,7 +35,7 @@ void SysTick_Handler (void)
  详解：此函数用于初始化延时模块,使用函数时必须调用。否则会造成延时函数出错
 			 在使用uCOS时 必须在OSInit();之后调用DelayInit(); 以启动OS节拍
 ************************************************************************************************/
-void DelayInit()//SYSCLK默认等于核心频率为48MHz 频率在MDK启动文件中设置 CLOCK_SETUP 宏
+void DelayInit()
 {
 	SysTick->CTRL|=0x04;							//设置系统滴答时钟源为系统内核频率
 	GetCPUInfo();  							//计算系统时钟
