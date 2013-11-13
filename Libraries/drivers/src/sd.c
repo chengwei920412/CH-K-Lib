@@ -14,9 +14,9 @@
 uint8_t SD_CardType = SD_CARD_TYPE_NONE;
 uint32_t SD_RCA = 0;
 //函数名称：SD_SetBaudRate                                                        
-//功能概要：设置SDHC模块的时钟。                                                                                       
-//         baudrate：波特率   参考官方程序                    
-//函数返回：无                                                               
+//功能概要：设置SDHC模块的时钟。
+//         baudrate：波特率   参考官方程序
+//函数返回：无
 void SD_SetBaudRate(uint32_t baudrate)
 {
 	uint32_t pres, div, min, minpres = 0x80, mindiv = 0x0F;
@@ -282,7 +282,7 @@ uint8_t SD_ReadSingleBlock(uint32_t sector, uint8_t *buffer)
             while (0 == (SDHC->PRSSTAT & SDHC_PRSSTAT_BREN_MASK)) {};
 						*ptr = SDHC->DATPORT;	  
 						ptr++;	//这里取代 *ptr++=SDHC->DATPORT;	 因为这句有BUG
-						
+
         }
 	return ESDHC_OK;
 }
@@ -333,6 +333,30 @@ uint8_t SD_WriteSingleBlock(uint32_t sector, const uint8_t *buffer)
 						SDHC->DATPORT = *ptr;	
 						ptr++;	//这里取代 *ptr++=SDHC->DATPORT;	 因为这句有BUG
         }
+				
+	if (SDHC->IRQSTAT & (SDHC_IRQSTAT_DEBE_MASK | SDHC_IRQSTAT_DCE_MASK | SDHC_IRQSTAT_DTOE_MASK))
+	{
+		SDHC->IRQSTAT |= SDHC_IRQSTAT_DEBE_MASK | SDHC_IRQSTAT_DCE_MASK | SDHC_IRQSTAT_DTOE_MASK;
+		results = ESDHC_ERROR_DATA_TRANSFER;
+	}
+	SDHC->IRQSTAT |= SDHC_IRQSTAT_TC_MASK | SDHC_IRQSTAT_BRR_MASK | SDHC_IRQSTAT_BWR_MASK;
+	//等待卡准备好，传输状态
+	do
+	{
+			SD_CommandStruct1.COMMAND = ESDHC_CMD13;
+			SD_CommandStruct1.ARGUMENT = SD_RCA;
+			SD_CommandStruct1.BLOCKS = 0;
+			results = SD_SendCommand(&SD_CommandStruct1);
+			if(results != ESDHC_OK) return ESDHC_ERROR_DATA_TRANSFER;  
+
+			if (SD_CommandStruct1.RESPONSE[0] & 0xFFD98008)
+			{
+					//count = 0; // necessary to get real number of written blocks 
+					break;
+			}
+
+	} while (0x000000900 != (SD_CommandStruct1.RESPONSE[0] & 0x00001F00));
+	
 	return ESDHC_OK;
 }
 
@@ -404,7 +428,7 @@ uint32_t SD_SendCommand(SD_CommandTypeDef* Command)
     //恢复命令必须设置DPSEL位
     xfertyp |= SDHC_XFERTYP_DPSEL_MASK;
   }
-  if ((0 != Command->BLOCKS) && (0 != Command->BLOCKSIZE))
+  if ((Command->BLOCKS > 1) && (0 != Command->BLOCKSIZE))
   {
 		//printf("多块传输\r\n");
     xfertyp |= SDHC_XFERTYP_DPSEL_MASK;
@@ -418,11 +442,15 @@ uint32_t SD_SendCommand(SD_CommandTypeDef* Command)
     }
 
   }
-  else
+  else if(Command->BLOCKS == 1)
   {
-		//printf("单块传输\r\n");
-    blkattr = SDHC_BLKATTR_BLKSIZE(512) | SDHC_BLKATTR_BLKCNT(0);
+		//UART_printf("单块传输\r\n");
+    blkattr = SDHC_BLKATTR_BLKSIZE(512) | SDHC_BLKATTR_BLKCNT(1);
   }
+	else
+	{
+		blkattr = SDHC_BLKATTR_BLKSIZE(512) | SDHC_BLKATTR_BLKCNT(0);
+	}
   //清除卡移除状态
   SDHC->IRQSTAT |= SDHC_IRQSTAT_CRM_MASK;
   //等待CMD空闲
@@ -564,34 +592,43 @@ uint8_t SD_WriteMultiBlock(uint32_t sector,const uint8_t *pbuffer, uint16_t coun
 	SD_CommandStruct1.BLOCKSIZE = 512;
 	SD_CommandStruct1.ARGUMENT = sector;
 	results = SD_SendCommand(&SD_CommandStruct1);
-	if(results != ESDHC_OK) return ESDHC_ERROR_DATA_TRANSFER;  
+	if(results != ESDHC_OK) 
+	{
+//		UART_printf("CMD ERR\r\n");
+		return ESDHC_ERROR_DATA_TRANSFER;  
+	}
+
 	//开始传送数据
 	for(i=0;i<count;i++)
 	{
-		if (((uint32_t)pbuffer & 0x03) == 0)
-		{    
-			for (j = (512+3)>>2;j!= 0;j--)
-			{
-				//检测错误 有错误则退出
-				if (SDHC->IRQSTAT & (   SDHC_IRQSTAT_DEBE_MASK //Data End Bit Error
-															| SDHC_IRQSTAT_DCE_MASK  //Data CRC Error
-															| SDHC_IRQSTAT_DTOE_MASK)) //DataTimeout Error
-				{
-						SDHC->IRQSTAT |= SDHC_IRQSTAT_DEBE_MASK 
-													| SDHC_IRQSTAT_DCE_MASK 
-													| SDHC_IRQSTAT_DTOE_MASK 
-													| SDHC_IRQSTAT_BRR_MASK; //Buffer Read Ready
-						return ESDHC_ERROR_DATA_TRANSFER;
-				}
-				//等待直到传输完成
-				while (0 == (SDHC->PRSSTAT & SDHC_PRSSTAT_BWEN_MASK)){}; //等待数据准备好
-				SDHC->DATPORT = *ptr;
-				ptr++;	//这里取代 *ptr++=SDHC->DATPORT;	 因为这句有BUG
-			}
-		}
+	        for (j = (512)>>2;j!= 0;j--)
+        {
+            if (SDHC->IRQSTAT & (  SDHC_IRQSTAT_DEBE_MASK //Data End Bit Error
+                                  | SDHC_IRQSTAT_DCE_MASK  //Data CRC Error
+                                  | SDHC_IRQSTAT_DTOE_MASK)) //DataTimeout Error
+					
+            {
+                SDHC->IRQSTAT |= SDHC_IRQSTAT_DEBE_MASK 
+                              | SDHC_IRQSTAT_DCE_MASK 
+                              | SDHC_IRQSTAT_DTOE_MASK 
+                              | SDHC_IRQSTAT_BWR_MASK; //Buffer Write Ready
+                return ESDHC_ERROR_DATA_TRANSFER;
+            }
+            while (0 == (SDHC->PRSSTAT & SDHC_PRSSTAT_BWEN_MASK)){}; //等待数据准备好
+						SDHC->DATPORT = *ptr;	
+						ptr++;	//这里取代 *ptr++=SDHC->DATPORT;	 因为这句有BUG
+        }
 	}
+	
+
 	//等待传输结束
 	SD_StatusWait (SDHC_IRQSTAT_TC_MASK);
+	//UART_printf("Begin Send CMD12\r\n");
+//			SD_CommandStruct1.COMMAND = ESDHC_CMD12;
+//			SD_CommandStruct1.ARGUMENT = SD_RCA;
+	//		SD_CommandStruct1.BLOCKS = 0;
+	//		results = SD_SendCommand(&SD_CommandStruct1);
+		
 	if (SDHC->IRQSTAT & (SDHC_IRQSTAT_DEBE_MASK | SDHC_IRQSTAT_DCE_MASK | SDHC_IRQSTAT_DTOE_MASK))
 	{
 		SDHC->IRQSTAT |= SDHC_IRQSTAT_DEBE_MASK | SDHC_IRQSTAT_DCE_MASK | SDHC_IRQSTAT_DTOE_MASK;
@@ -609,10 +646,11 @@ uint8_t SD_WriteMultiBlock(uint32_t sector,const uint8_t *pbuffer, uint16_t coun
 
 			if (SD_CommandStruct1.RESPONSE[0] & 0xFFD98008)
 			{
-					count = 0; /* necessary to get real number of written blocks */
+					count = 0; // necessary to get real number of written blocks 
 					break;
 			}
 
 	} while (0x000000900 != (SD_CommandStruct1.RESPONSE[0] & 0x00001F00));
+	
 	return ESDHC_OK;
 }

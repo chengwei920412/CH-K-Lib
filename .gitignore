@@ -11,6 +11,7 @@
 *.browse
 *.tmp
 *.db
+*.__ia
 *.dni
 *.wsdt
 *.pbi

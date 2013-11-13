@@ -127,7 +127,45 @@ typedef struct
 #define ESDHC_PROCTL_DTW_4BIT                (0x01)
 #define ESDHC_PROCTL_DTW_8BIT                (0x10)
 
-//本构件所实现的函数接口
+
+
+
+
+typedef enum
+{
+	SD_Flag_CLSL,                 //!< Command line single level
+	SD_Flag_CINS,                 //!< Card inserted
+	SD_Flag_BREN,                 //!< Buffer Read Enable
+	SD_Flag_BWEN,                 //!< Buffer Write Enable
+	SD_Flag_RTA,                  //!< Read transfer active
+	SD_Flag_WTA,                  //!< Write transfer active
+	SD_Flag_SDOFF,                //!< SD clock gated off internaly
+	SD_Flag_PEROFF,               //!< SDHC gate clock off
+	SD_Flag_DLA,                  //1< Data line active
+	SD_Flag_CDIHB,                //!< Command inhibit(DAT)
+	SD_Flag_CIHB,                 //!< Command inhibit (CMD)
+}SD_Flag_TypeDef;
+
+typedef enum
+{
+	SD_IT_DMAE,                  //!< DMA Err
+	SD_IT_AC12E,                 //!< Auto CMD12 Err
+	SD_IT_DEBE,                  //!< Data End Bit Err
+	SD_IT_DCE,                   //!< Data CRC Err
+	SD_IT_DTOE,                  //!< Data Timeout Err
+	SD_IT_CIE,                   //!< Command index Err
+	SD_IT_CEBE,                  //!< Command end bit error
+	SD_IT_CC,                    //!< Command Complete 
+	SD_IT_TC,                    //!< Transfer Complete
+	SD_IT_BGE,                   //!< Block Gap Event 
+	SD_IT_DINT,                  //!< DMA interrupt
+	SD_IT_BWR,                   //!< Buffer Read Ready
+	SD_IT_CINS,                  //!< Card Insertion 
+	SD_IT_CRM,                   //!< Card Removal
+	SD_IT_CINT,                  //!< Card Interrupt
+}SD_IT_TypeDef;
+
+//API functions
 uint8_t SD_Init(SD_InitTypeDef* SD_InitStruct);
 uint32_t SD_GetCapacity(SD_InitTypeDef* SD_InitStruct);
 uint8_t SD_ReadSingleBlock(uint32_t sector, uint8_t *buffer);
@@ -135,6 +173,12 @@ uint8_t SD_WriteSingleBlock(uint32_t sector, const uint8_t *buffer);
 uint8_t SD_ReadMultiBlock(uint32_t sector, uint8_t *pbuffer, uint16_t count);
 uint8_t SD_WriteMultiBlock(uint32_t sector,const uint8_t *pbuffer, uint16_t count);
 uint32_t SD_SendCommand(SD_CommandTypeDef* Command);
+void SD_ITConfig(SDHC_Type* SDx, SD_IT_TypeDef SD_IT, FunctionalState NewState);
+ITStatus SD_GetITStates(SDHC_Type* SDx, SD_IT_TypeDef SD_IT);
+void SD_ClearITPendingBit(SDHC_Type* SDx, SD_IT_TypeDef SD_IT);
+void SD_ClearAllITPendingFlag(void);
+
+
 
 #ifdef __cplusplus
 }
