@@ -67,6 +67,13 @@ uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
    ---------------------------------------------------------------------------- */
 
 void SystemInit (void) {
+  /* Disable the WDOG module */
+  /* WDOG_UNLOCK: WDOGUNLOCK=0xC520 */
+  WDOG->UNLOCK = (uint16_t)0xC520u;     /* Key 1 */
+  /* WDOG_UNLOCK : WDOGUNLOCK=0xD928 */
+  WDOG->UNLOCK  = (uint16_t)0xD928u;    /* Key 2 */
+  /* WDOG_STCTRLH: ??=0,DISTESTWDOG=0,BYTESEL=0,TESTSEL=0,TESTWDOG=0,??=0,STNDBYEN=1,WAITEN=1,STOPEN=1,DBGEN=0,ALLOWUPDATE=1,WINEN=0,IRQRSTEN=0,CLKSRC=1,WDOGEN=0 */
+  WDOG->STCTRLH = (uint16_t)0x01D2u;
 }
 
 /* ----------------------------------------------------------------------------
