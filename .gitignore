@@ -4,6 +4,7 @@
 *.o.*
 *.bat
 *.dbgdt
+*.db
 *.dni
 *.wsdt
 *.pbi
