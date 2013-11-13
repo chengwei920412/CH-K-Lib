@@ -3,6 +3,7 @@
 
 #include "kbi.h"
 
+//!< CHK60EB板 超核K60开发板上 KEY资源
 typedef enum
 { 
     kKEY1,

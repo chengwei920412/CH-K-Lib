@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    key.c
+  * @file    kbi.c
   * @author  YANDLD
   * @version V2.4
   * @date    2013.5.23
@@ -10,6 +10,8 @@
 
 #include "kbi.h"
 
+
+//!< state machine bitfield define
 #define KBI_STATE_MASK      0xC000u
 #define KBI_STATE_SHIFT     14
 #define KBI_STATE(x)        (((uint32_t)(((uint32_t)(x))<<KBI_STATE_SHIFT))&KBI_STATE_MASK)
@@ -59,7 +61,11 @@ void KBI_Init(const KBI_PinLookup_TypeDef* KBI_PinLookupStruct, uint32_t NumOfKE
         }
 		}
 }
-
+  /**
+  * @brief  Get key electric state
+  * @param  KeyIndex: key index
+  * @retval Bit_SET: high state Bit_RESET: low state
+  */
 uint8_t KBI_GetKeyValue(uint32_t KeyIndex)
 {
     if(KeyIndex < gNumOfKEYs)
@@ -69,12 +75,18 @@ uint8_t KBI_GetKeyValue(uint32_t KeyIndex)
 		}
 		return 0xFF;
 }
-
+  /**
+  * @brief  Get total num of key
+  * @retval total num of key
+  */
 uint32_t KBI_GetNumOfKEY(void)
 {
     return gNumOfKEYs;
 }
-
+  /**
+  * @brief  Get KBI_Scan period
+  * @retval KBI_Scan period in US
+  */
 uint32_t KBI_GetScanPeriodInUs(void)
 {
     return KBI_SCAN_PERIOD_IN_US;
@@ -94,7 +106,7 @@ static KBI_State_TypeDef GetKeyState(uint32_t KeyIndex)
 static void SetKeyTime(uint32_t KeyIndex, uint16_t TimeInPeriod)
 {
     gKBI_KeyStates[KeyIndex] &= ~KBI_TIMEOUT_MASK;
-	  gKBI_KeyStates[KeyIndex] |= KBI_TIMEOUT(TimeInPeriod);
+    gKBI_KeyStates[KeyIndex] |= KBI_TIMEOUT(TimeInPeriod);
 }
 
 static uint16_t GetKeyTime(uint32_t KeyIndex)
@@ -107,12 +119,23 @@ static void SetRetState(uint32_t KeyIndex, KBI_KeyState_TypeDef RetValue)
     gKBI_KeyStates[KeyIndex] &= ~KBI_RETSTATE_MASK;
     gKBI_KeyStates[KeyIndex] |= (RetValue<<KBI_RETSTATE_SHIFT);
 }
-
+  /**
+  * @brief  Gey Key State
+  * @param  KeyIndex: key index
+  * @retval 
+  *    @arg kKBI_NO_KEY: no key pressed
+  *    @arg kKBI_SINGLE: a single pressed detected
+  *    @arg kKBI_LONG:   a long pressed detected
+  */
 KBI_KeyState_TypeDef KBI_GetKeyState(uint32_t KeyIndex)
 {
     return (KBI_KeyState_TypeDef)((gKBI_KeyStates[KeyIndex] & KBI_RETSTATE_MASK) >> KBI_RETSTATE_SHIFT);
 }
-
+  /**
+  * @brief  Key_Scan this function must be called in every (KBI_LONG_KEY_TIMEIN_US)
+  * @param  none
+  * @retval none
+  */
 void KBI_Scan(void)
 {
     uint8_t i;

@@ -3,7 +3,7 @@
 
 #include "kbi.h"
 
-
+// !< CHK60Atom 原子核核心板上 KEY资源
 typedef enum
 { 
     kKEY1,

@@ -6,6 +6,7 @@
 *.bat
 *.__i
 *.dbgdt
+*.tra
 *.tmp
 *.db
 *.dni
