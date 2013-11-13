@@ -2,7 +2,9 @@
 *.o
 *.ko
 *.o.*
+*.uvgui.*
 *.bat
+*.__i
 *.dbgdt
 *.tmp
 *.db
