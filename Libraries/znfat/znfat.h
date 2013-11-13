@@ -17,7 +17,7 @@
 #define FDI_NBYTES (32) //文件目录项所占字节数 
 #define NFDI_PER_SEC (16) //每扇区的文件目录项数
 
-#define ZNFAT_BUF_SIZE (512) //znFAT内部缓冲区大小 
+#define ZNFAT_BUF_SIZE (512*4) //znFAT内部缓冲区大小 
 
 #define SOC(c)  (((c-2)*(pInit_Args->SectorsPerClust))+(pInit_Args->FirstDirSector)) //计算簇的开始扇区 Start Sector Of Cluster
 

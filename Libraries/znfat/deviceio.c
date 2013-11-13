@@ -48,7 +48,7 @@ UINT8 znFAT_Device_Init(void)
 UINT8 znFAT_Device_Read_Sector(UINT32 addr,UINT8 *buffer)
 {
  if(buffer==znFAT_Buffer) //如果是针对znFAT内部缓冲区的操作
- {                        
+ {
   if(ioctl.just_dev==Dev_No  //如果现在要读取的扇区与内部缓冲所对应的扇区（即最近一次操作的扇区）是同一扇区
      && (ioctl.just_sec==addr && 0!=ioctl.just_sec)) //则不再进行读取，直接返回
   {                                           
@@ -138,7 +138,7 @@ UINT8 znFAT_Device_Read_nSector(UINT32 nsec,UINT32 addr,UINT8 *buffer)
   switch(Dev_No)
   {
    case 0:
-          while(Device0_Read_nSector(nsec,addr,buffer));
+		      SD_ReadMultiBlock(addr, buffer, nsec);
    //case 1:
           //while(Device1_Read_nSector(nsec,addr,buffer));
   }
@@ -179,7 +179,7 @@ UINT8 znFAT_Device_Write_nSector(UINT32 nsec,UINT32 addr,UINT8 *buffer)
   switch(Dev_No)
   {
    case 0:
-          while(Device0_Write_nSector(nsec,addr,buffer));
+		     SD_WriteMultiBlock(addr, buffer, nsec);
    //case 1:
           //while(Device1_Write_nSector(nsec,addr,buffer));
   }

@@ -165,7 +165,7 @@ typedef enum
 	SD_IT_CINT,                  //!< Card Interrupt
 }SD_IT_TypeDef;
 
-//API functions
+//本构件所实现的函数接口
 uint8_t SD_Init(SD_InitTypeDef* SD_InitStruct);
 uint32_t SD_GetCapacity(SD_InitTypeDef* SD_InitStruct);
 uint8_t SD_ReadSingleBlock(uint32_t sector, uint8_t *buffer);

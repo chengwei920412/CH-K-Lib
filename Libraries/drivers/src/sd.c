@@ -14,9 +14,9 @@
 uint8_t SD_CardType = SD_CARD_TYPE_NONE;
 uint32_t SD_RCA = 0;
 //函数名称：SD_SetBaudRate                                                        
-//功能概要：设置SDHC模块的时钟。
-//         baudrate：波特率   参考官方程序
-//函数返回：无
+//功能概要：设置SDHC模块的时钟。                                                                                       
+//         baudrate：波特率   参考官方程序                    
+//函数返回：无                                                               
 void SD_SetBaudRate(uint32_t baudrate)
 {
 	uint32_t pres, div, min, minpres = 0x80, mindiv = 0x0F;
@@ -282,7 +282,7 @@ uint8_t SD_ReadSingleBlock(uint32_t sector, uint8_t *buffer)
             while (0 == (SDHC->PRSSTAT & SDHC_PRSSTAT_BREN_MASK)) {};
 						*ptr = SDHC->DATPORT;	  
 						ptr++;	//这里取代 *ptr++=SDHC->DATPORT;	 因为这句有BUG
-
+						
         }
 	return ESDHC_OK;
 }
@@ -594,7 +594,7 @@ uint8_t SD_WriteMultiBlock(uint32_t sector,const uint8_t *pbuffer, uint16_t coun
 	results = SD_SendCommand(&SD_CommandStruct1);
 	if(results != ESDHC_OK) 
 	{
-//		UART_printf("CMD ERR\r\n");
+		UART_printf("CMD ERR\r\n");
 		return ESDHC_ERROR_DATA_TRANSFER;  
 	}
 

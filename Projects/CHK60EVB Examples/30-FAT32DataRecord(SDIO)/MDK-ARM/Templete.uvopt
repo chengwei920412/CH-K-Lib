@@ -619,8 +619,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>579</TopLine>
+      <CurrentLine>589</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\Libraries\drivers\src\sd.c</PathWithFileName>
       <FilenameWithoutPath>sd.c</FilenameWithoutPath>
@@ -635,8 +635,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\Libraries\drivers\src\spi.c</PathWithFileName>
       <FilenameWithoutPath>spi.c</FilenameWithoutPath>
@@ -679,7 +679,7 @@
 
   <Group>
     <GroupName>utilities</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -767,7 +767,7 @@
 
   <Group>
     <GroupName>user</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -807,7 +807,7 @@
 
   <Group>
     <GroupName>znfat</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -817,10 +817,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>10</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>172</TopLine>
+      <CurrentLine>181</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\Libraries\znfat\deviceio.c</PathWithFileName>
       <FilenameWithoutPath>deviceio.c</FilenameWithoutPath>
@@ -833,10 +833,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>2</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>160</TopLine>
+      <CurrentLine>161</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\Libraries\znfat\znFAT.c</PathWithFileName>
       <FilenameWithoutPath>znFAT.c</FilenameWithoutPath>
