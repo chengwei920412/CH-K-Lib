@@ -108,3 +108,10 @@ CH-KinetisV2.40
 │  │  ├─40-MassageBox(uCOS)                 uCOS 消息邮箱实验
 │  │  ├─41-uCGUI(uCGUI)                     uCGUI 移植实验
 │  │  ├─42-USB_Bootloader(CDC)           USBBooltoader实验（配合Templete(Bootloader)模板
+├─Tools: 工具
+│  │  
+│  │ 
+│  │─ PuTTY 串口工具
+│  │ 
+│  │─ CHKinetisBootloaderV1.1.exe 超核Bootloader下载上位机
+│  │─ HIDTester.exe HID测试上位机，配合 HID实验
