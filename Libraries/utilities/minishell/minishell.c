@@ -22,7 +22,7 @@
 #define MAX_FUNCTION_NUM  (64)
 
 //! @brief global buffer of console input
-char console_buffer[CB_SIZE];
+char gConsoleBuffer[CB_SIZE];
 //! @brief prototypes
 static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen);
 static int CommandFun_Help(int argc, char *argv[]);
@@ -32,8 +32,7 @@ static const char   tab_seq[] = "        ";		/* used to expand TABs	*/
 
 //! @brief Variables
 static MINISHELL_InstallTypeDef gInstall;
-static MINISHELL_CommandTableTypeDef* gpSHELL_ExCmdTable[MAX_FUNCTION_NUM];
-static uint32_t gNumOfFunctions = 0;
+static MINISHELL_CommandTableTypeDef* gpCmdTable[MAX_FUNCTION_NUM];
 
 //! @brief SHELL Internal function
 static MINISHELL_CommandTableTypeDef SHELL_InFunTable[] =
@@ -46,14 +45,32 @@ static MINISHELL_CommandTableTypeDef SHELL_InFunTable[] =
     },
 };
 
-static void SHELL_InsertFunction(void* pAddress)
+static int SHELL_InsertFunction(MINISHELL_CommandTableTypeDef* pAddress)
 {
-    if(gNumOfFunctions >= MAX_FUNCTION_NUM)
-    {
-        return;
+    uint32_t i;
+	  //check name conflict
+		for(i = 0; i < MAX_FUNCTION_NUM; i++)
+		{
+        if(!strcmp(gpCmdTable[i]->name, pAddress->name))
+				{
+            return 1;
+				}
     }
-    gpSHELL_ExCmdTable[gNumOfFunctions] = (MINISHELL_CommandTableTypeDef*) pAddress;
-    gNumOfFunctions++;
+		//find empty pointer
+		for(i = 0; i < MAX_FUNCTION_NUM; i++)
+		{
+        if(gpCmdTable[i] == NULL)
+        {
+            gpCmdTable[i] = (MINISHELL_CommandTableTypeDef*) pAddress;
+            return 0;
+        }
+		}
+		//function slocket is full
+		if(i == MAX_FUNCTION_NUM)
+    {
+        return 2;
+    }
+		
 }
 
 void MINISHELL_Init(void)
@@ -61,7 +78,7 @@ void MINISHELL_Init(void)
     uint8_t i;
     for(i = 0;i < ARRAY_SIZE(SHELL_InFunTable); i++)
     {
-        SHELL_InsertFunction((void*) &SHELL_InFunTable[i]);
+        SHELL_InsertFunction(&SHELL_InFunTable[i]);
     }
 }
 
@@ -105,18 +122,27 @@ static int CommandFun_Help(int argc, char *argv[])
     uint32_t i = 0;
 	  MINISHELL_printf("Available Commands:\r\n");
     //dispaly internal functions
-    for(i = 0; i < gNumOfFunctions; i++)
+	  
+    for(i = 0; i < MAX_FUNCTION_NUM; i++)
     {
-        MINISHELL_printf("name:%s |",     gpSHELL_ExCmdTable[i]->name);
-        MINISHELL_printf("usage:%s \r\n", gpSHELL_ExCmdTable[i]->usage); 
+        if(gpCmdTable[i] != NULL)
+				{
+            MINISHELL_printf("name:%s |",     gpCmdTable[i]->name);
+            MINISHELL_printf("usage:%s \r\n", gpCmdTable[i]->usage); 
+				}
     }
-		return 0;
+    return 0;
 }
 
-//! @brief MiniShell register user defined functions
+/**
+  * @brief  Install a list of user application functions
+  * @param  SHELL_CommandTableStruct:pointor if minishell funtction install struct.
+  * @param  NumberOfFunction: number of user functions
+  * @retval None
+  */
 void MINISHELL_Register(MINISHELL_CommandTableTypeDef* SHELL_CommandTableStruct, uint16_t NumberOfFunction)
 {
-    uint8_t i;
+    uint32_t i;
     if((SHELL_CommandTableStruct != NULL) && (NumberOfFunction != 0))
 		{
         for(i = 0; i < NumberOfFunction; i++)
@@ -124,6 +150,25 @@ void MINISHELL_Register(MINISHELL_CommandTableTypeDef* SHELL_CommandTableStruct,
             SHELL_InsertFunction(&SHELL_CommandTableStruct[i]);
         }
 		}
+}
+
+int MINISHELL_UnRegister(const char* name)
+{
+    uint32_t i;
+    for(i = 0; i < MAX_FUNCTION_NUM; i++)
+    {
+        //match
+        if(!strcmp(name, gpCmdTable[i]->name))
+				{
+            gpCmdTable[i] = NULL;
+            return 0;
+				}
+    }
+    if(i == MAX_FUNCTION_NUM)
+		{
+        return 1;
+		}
+		return -1;
 }
 
 
@@ -359,11 +404,11 @@ int run_command(const char *cmd, int flag)
         return -1;
     }
     /* Look up command in command table */
-    for(i=0;i<gNumOfFunctions;i++)
+    for(i = 0; i < MAX_FUNCTION_NUM; i++)
 		{
-        if(find_cmd(argv[0], gpSHELL_ExCmdTable[i], 1) != NULL)
+        if(find_cmd(argv[0], gpCmdTable[i], 1) != NULL)
         {
-            cmdtp = gpSHELL_ExCmdTable[i];
+            cmdtp = gpCmdTable[i];
             IsMatch = 1;
             break;
         }
@@ -395,10 +440,10 @@ void MINISHELL_CmdHandleLoop(char *name)
 
     for (;;) 
     {
-        len = readline_into_buffer(name, console_buffer);
+        len = readline_into_buffer(name, gConsoleBuffer);
         flag = 0;	/* assume no special flags for now */
         if (len > 0)
-        strcpy(lastcommand, console_buffer);
+        strcpy(lastcommand, gConsoleBuffer);
         if (len == -1)
             MINISHELL_printf("<INTERRUPT>\n");
         else
