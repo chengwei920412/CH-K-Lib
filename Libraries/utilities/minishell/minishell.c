@@ -1,26 +1,49 @@
-#include "minishell.h"
-#include "stdarg.h"
-#include "stdio.h"
-#include "string.h"
+/**
+  ******************************************************************************
+  * @file    minishell.c
+  * @author  YANDLD
+  * @version V1.0
+  * @date    2013.11.25
+  * @brief   minishell components
+  ******************************************************************************
+  */
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
+#include "minishell.h"
+
+//! @defgroup MiniShell
+//! @{
+
+//! @brief Definitions
 #define CB_SIZE			64
 #define MAX_ARGS		5
 #define MAX_FUNCTION_NUM  (64)
-char console_buffer[CB_SIZE];		/* console I/O buffer	*/
+
+//! @brief global buffer of console input
+char console_buffer[CB_SIZE];
+//! @brief prototypes
 static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen);
+static int CommandFun_Help(int argc, char *argv[]);
+//! @brief consts
 static const char erase_seq[] = "\b \b";		/* erase sequence	*/
 static const char   tab_seq[] = "        ";		/* used to expand TABs	*/
+
+//! @brief Variables
 static MINISHELL_InstallTypeDef gInstall;
 static MINISHELL_CommandTableTypeDef* gpSHELL_ExCmdTable[MAX_FUNCTION_NUM];
 static uint32_t gNumOfFunctions = 0;
 
-//SHELL Internal function
-static int CommandFun_Help(int argc, char *argv[]);
-
+//! @brief SHELL Internal function
 static MINISHELL_CommandTableTypeDef SHELL_InFunTable[] =
 {
-    { "help", 1, CommandFun_Help ,"help" },
-    { "list", 1, CommandFun_Help ,"help" },
+    {
+        .name = "help",
+        .maxargs = 1,
+        .cmd = CommandFun_Help,
+        .usage = "help",
+    },
 };
 
 static void SHELL_InsertFunction(void* pAddress)
@@ -388,4 +411,5 @@ void MINISHELL_CmdHandleLoop(char *name)
     }
 }
 
+//! @}
 
