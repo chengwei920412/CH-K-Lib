@@ -1,7 +1,14 @@
+/**
+  ******************************************************************************
+  * @file    minishell.h
+  * @author  YANDLD
+  * @version V1.0
+  * @date    2013.11.25
+  * @brief   minishell components
+  ******************************************************************************
+  */
 #ifndef __MINISHELL_H__
 #define __MINISHELL_H__
-
-#include "uart.h"
 
 
 //! @brief Computes the number of elements in an array.
@@ -10,14 +17,14 @@
 #endif
 
 
-//SHELL操作连接器
+//! @brief SHELL external depend function interface(isntall functions)
 typedef struct
 {
     void     (*ctrl_putchar)(uint8_t);
     uint8_t  (*ctrl_getchar)(void);
 }MINISHELL_InstallTypeDef;
 
-//用户注册函数结构
+//! @brief SHELL external function install struct
 typedef struct
 {
     char *name;                 //!< Command name
@@ -27,14 +34,13 @@ typedef struct
 }MINISHELL_CommandTableTypeDef;
 
 
-//API Functions
+//! @brief API Functions
 void MINISHELL_Init(void);
 void MINISHELL_Install(MINISHELL_InstallTypeDef* pInstall);
 int MINISHELL_printf(const char *format,...);
 void MINISHELL_CmdHandleLoop(char *name);
 void MINISHELL_Register(MINISHELL_CommandTableTypeDef* SHELL_CommandTableStruct, uint16_t NumberOfFunction);
-
+int MINISHELL_UnRegister(const char* name);
 
 #endif
-
 
