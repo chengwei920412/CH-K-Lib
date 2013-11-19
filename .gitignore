@@ -4,6 +4,7 @@
 *.o.*
 *.uvgui.*
 *.bat
+*.sim
 *.__i
 *.dbgdt
 *.tra
