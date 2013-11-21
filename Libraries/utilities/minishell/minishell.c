@@ -57,9 +57,12 @@ static int SHELL_InsertFunction(MINISHELL_CommandTableTypeDef* pAddress)
 	  //check name conflict
 		for(i = 0; i < MAX_FUNCTION_NUM; i++)
 		{
-        if(!strcmp(gpCmdTable[i]->name, pAddress->name))
+        if(gpCmdTable[i] != NULL)
 				{
-            return 1;
+            if(!strcmp(gpCmdTable[i]->name, pAddress->name))
+            {
+                return 1;
+            }
 				}
     }
 		//find empty pointer
