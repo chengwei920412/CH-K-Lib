@@ -1,6 +1,7 @@
 超核Kinetis K60 固件库V2.41
 
 1.本店地址:http://upcmcu.taobao.com 
+2:官方版本发布及讨论: http://www.beyondcore.net/
 2.MDK工程请使用 MDK4.53以上版本打开 IAR 请用6.6以上版本打开
 3.本文件夹请放在英文目录下，比如 不 要放到  /D/学习/...
 4.相关软件及最新版本下载地址：
