@@ -594,7 +594,7 @@ uint8_t SD_WriteMultiBlock(uint32_t sector,const uint8_t *pbuffer, uint16_t coun
 	results = SD_SendCommand(&SD_CommandStruct1);
 	if(results != ESDHC_OK) 
 	{
-		UART_printf("CMD ERR\r\n");
+//		UART_printf("CMD ERR\r\n");
 		return ESDHC_ERROR_DATA_TRANSFER;  
 	}
 
