@@ -155,6 +155,7 @@ static void FTM_PWM_SetMode(FTM_InitTypeDef *FTM_InitStruct)
 					break;
 				default:break;
 			}
+			break;
 			case FTM_Mode_Complementary:
 			{
 				//禁止写保护 可以写入所有FTM寄存器 开启增强模式
@@ -207,6 +208,7 @@ static void FTM_PWM_SetMode(FTM_InitTypeDef *FTM_InitStruct)
 					default:break;
 				}
 			}
+			break;
 			default:break;
 	}
 }
