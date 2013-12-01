@@ -180,30 +180,33 @@ void I2C_Send7bitAddress(I2C_Type* I2Cx, uint8_t Address, uint8_t I2C_Direction)
        @arg I2C0: I2C0 模块
        @arg I2C1: I2C1 模块
 
- 返回：TRUE   :收到应答完成 
-       FALSE  :传输完成 但未收到应答信号
- 详解：主机每传送一个字节都需要调用I2C_WaitAck一次
+ 返回：0   :成功收到应答 
+       1   :未收到应答
+ 详解：主机每传送一个字节都需要调用I2C_WaitAck一次 WaitAck 会等待这一个字节传输结束 包括最后ACK位的结束后返回
 ************************************************************************************************/
 uint8_t I2C_WaitAck(I2C_Type *I2Cx)
 {
-	uint8_t ret = 0;
-	uint16_t err_time = 0;
+
 	//参数检查
 	assert_param(IS_I2C_ALL_PERIPH(I2Cx));
 	
-	while((I2Cx->S & I2C_S_IICIF_MASK) == 0)
-	{
-		err_time++;
-		if(err_time > 10000) return FALSE;
-		if(I2Cx->S & I2C_S_RXAK_MASK)
+    //wait for transfer complete
+    while ((I2Cx->S & I2C_S_TCF_MASK) == 0);
+    //both TCF and IICIF indicate one byte trasnfer complete
+    while ((I2Cx->S & I2C_S_IICIF_MASK) == 0);
+	  //IICIF is a W1C Reg, so clear it!
+	  I2Cx->S |= I2C_S_IICIF_MASK;
+    //see if we receive the ACK signal
+    if (I2Cx->S & I2C_S_RXAK_MASK)
 		{
-			ret = 1;
+        return 1;
 		}
-	}
-	I2Cx->S |= I2C_S_IICIF_MASK;
-	if(ret == 1) return TRUE;
-	return FALSE;
+		else
+		{
+        return 0;
+		}
 }
+
 /***********************************************************************************************
  功能：I2C 设置主机读写模式
  形参：I2Cx: I2C模块号
@@ -416,6 +419,108 @@ uint8_t I2C_IsLineBusy(I2C_Type* I2Cx)
 		return FALSE;
 	}
 }
+/***********************************************************************************************
+ 功能：通用 I2C 读写一个从机的一个寄存器 适用于大多数期间 MMA84系列传感器等等
+ 形参：I2Cx: I2C模块号
+       @arg I2C0 : I2C0模块
+       @arg I2C1 : I2C1模块
+       DeviceAddress: 设备地址
+       RegisterAddress:寄存器在设备中的地址
+       Data: 需要写入的数据
+ 返回：0:成功 else: 错误代码
+ 详解：实质顺序为 START->ADDRESS->RegADR->Data->STOP->Wait until all stop
+************************************************************************************************/
+uint8_t I2C_WriteSingleRegister(I2C_Type* I2Cx, uint8_t DeviceAddress, uint8_t RegisterAddress, uint8_t Data)
+{
+    //Generate START signal
+    I2C_GenerateSTART(I2Cx);
+    //Send 7bit Data with WRITE operation
+    I2C_Send7bitAddress(I2Cx, DeviceAddress, I2C_MASTER_WRITE);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+			  while(I2Cx->S & I2C_S_BUSY_MASK == 1) {};
+        return 1;
+    }
+    //Send Reg Address
+		I2C_SendData(I2Cx, RegisterAddress);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+        while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+        return 2;
+    }
+		//SendData
+		I2C_SendData(I2Cx, Data);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+        while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+        return 3;
+    }
+		//Generate stop and wait for line idle
+		I2C_GenerateSTOP(I2Cx);
+    while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+		return 0;
+}
+/***********************************************************************************************
+ 功能：通用 I2C 读写一个从机的一个寄存器 适用于大多数期间 MMA84系列传感器等等
+ 形参：I2Cx: I2C模块号
+       @arg I2C0 : I2C0模块
+       @arg I2C1 : I2C1模块
+       DeviceAddress: 设备地址
+       RegisterAddress:寄存器在设备中的地址
+       Data: 需要写入的数据
+ 返回：0:成功 else: 错误代码
+ 详解：实质顺序为 START->ADDRESS->RESTART->ADDRESS_With_READ->ReadData->SEND_NACK->STOP->Wait until all stop
+************************************************************************************************/
+uint8_t I2C_ReadSingleRegister(I2C_Type* I2Cx, uint8_t DeviceAddress, uint8_t RegisterAddress, uint8_t* pData)
+{
+    uint8_t data;
+    //Generate START signal
+    I2C_GenerateSTART(I2Cx);
+    //Send 7bit Data with WRITE operation
+    I2C_Send7bitAddress(I2Cx, DeviceAddress, I2C_MASTER_WRITE);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+			  while((I2Cx->S & I2C_S_BUSY_MASK) == 1);
+        return 1;
+    }
+    //Send Reg Address
+		I2C_SendData(I2Cx, RegisterAddress);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+			  while((I2Cx->S & I2C_S_BUSY_MASK) == 1);
+        return 2;
+    }
+		//Generate RESTART Signal
+    I2C_GenerateRESTART(I2Cx);
+		//Resend 7bit Address, This time we use READ Command
+    I2C_Send7bitAddress(I2Cx, DeviceAddress, I2C_MASTER_READ);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+        while((I2Cx->S & I2C_S_BUSY_MASK) == 1);
+        return 3;
+    }
+    //Set Master in slave mode
+    I2C_SetMasterMode(I2Cx,I2C_MASTER_READ);
+		//Dummy Read in order to generate SCL clock
+    data = I2Cx->D;
+		I2C_GenerateNAck(I2Cx);
+		//This time, We just wait for masters receive byte transfer complete
+    I2C_WaitAck(I2Cx);
+		//Generate stop and wait for line idle
+		I2C_GenerateSTOP(I2Cx);
+    while((I2Cx->S & I2C_S_BUSY_MASK) == 1);
+		//actual read
+		data = I2Cx->D;
+		*pData = data;
+		return 0;
+}
+
 /*
 static const I2C_MapTypeDef I2C_Check_Maps[] = 
 { 

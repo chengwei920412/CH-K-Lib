@@ -103,7 +103,8 @@ ITStatus I2C_GetITStatus(I2C_Type* I2Cx, uint16_t I2C_IT);
 void I2C_DMACmd(I2C_Type* I2Cx, uint16_t I2C_DMAReq, FunctionalState NewState);
 void I2C_ClearITPendingBit(I2C_Type* I2Cx, uint16_t I2C_IT);
 uint8_t I2C_IsLineBusy(I2C_Type* I2Cx);
-
+uint8_t I2C_WriteSingleRegister(I2C_Type* I2Cx, uint8_t DeviceAddress, uint8_t RegisterAddress, uint8_t Data);
+uint8_t I2C_ReadSingleRegister(I2C_Type* I2Cx, uint8_t DeviceAddress, uint8_t RegisterAddress, uint8_t* pData);
 #ifdef __cplusplus
 }
 #endif
