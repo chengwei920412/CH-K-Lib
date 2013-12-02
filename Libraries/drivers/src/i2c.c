@@ -419,6 +419,37 @@ uint8_t I2C_IsLineBusy(I2C_Type* I2Cx)
 		return FALSE;
 	}
 }
+
+uint8_t I2C_Write(I2C_Type *I2Cx ,uint8_t DeviceAddress, uint8_t *pBuffer, uint32_t len)
+{
+    //Generate START signal
+    I2C_GenerateSTART(I2Cx);
+    //Send 7bit Data with WRITE operation
+    I2C_Send7bitAddress(I2Cx, DeviceAddress, I2C_MASTER_WRITE);
+    if(I2C_WaitAck(I2Cx))
+    {
+			  I2C_GenerateSTOP(I2Cx);
+			  while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+        return 1;
+    }
+		//Send All Data
+		while(len--)
+		{
+        I2C_SendData(I2Cx, *(pBuffer++));
+        if(I2C_WaitAck(I2Cx))
+        {
+            I2C_GenerateSTOP(I2Cx);
+            while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+            return 2;
+        }
+		}
+		//Generate stop and wait for line idle
+		I2C_GenerateSTOP(I2Cx);
+    while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
+		return 0;
+}
+
+
 /***********************************************************************************************
  功能：通用 I2C 读写一个从机的一个寄存器 适用于大多数期间 MMA84系列传感器等等
  形参：I2Cx: I2C模块号
@@ -432,37 +463,16 @@ uint8_t I2C_IsLineBusy(I2C_Type* I2Cx)
 ************************************************************************************************/
 uint8_t I2C_WriteSingleRegister(I2C_Type* I2Cx, uint8_t DeviceAddress, uint8_t RegisterAddress, uint8_t Data)
 {
-    //Generate START signal
-    I2C_GenerateSTART(I2Cx);
-    //Send 7bit Data with WRITE operation
-    I2C_Send7bitAddress(I2Cx, DeviceAddress, I2C_MASTER_WRITE);
-    if(I2C_WaitAck(I2Cx))
-    {
-			  I2C_GenerateSTOP(I2Cx);
-			  while(I2Cx->S & I2C_S_BUSY_MASK == 1) {};
-        return 1;
-    }
-    //Send Reg Address
-		I2C_SendData(I2Cx, RegisterAddress);
-    if(I2C_WaitAck(I2Cx))
-    {
-			  I2C_GenerateSTOP(I2Cx);
-        while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
-        return 2;
-    }
-		//SendData
-		I2C_SendData(I2Cx, Data);
-    if(I2C_WaitAck(I2Cx))
-    {
-			  I2C_GenerateSTOP(I2Cx);
-        while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
-        return 3;
-    }
-		//Generate stop and wait for line idle
-		I2C_GenerateSTOP(I2Cx);
-    while((I2Cx->S & I2C_S_BUSY_MASK) == 1) {};
-		return 0;
+    uint8_t ret;
+    uint8_t buf[2];
+    buf[0] = RegisterAddress;
+    buf[1] = Data;
+    ret = I2C_Write(I2Cx, DeviceAddress, buf, sizeof(buf));
+    return ret;
 }
+
+
+
 /***********************************************************************************************
  功能：通用 I2C 读写一个从机的一个寄存器 适用于大多数期间 MMA84系列传感器等等
  形参：I2Cx: I2C模块号
